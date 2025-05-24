@@ -28,7 +28,11 @@ public class InfoService {
     public Map<String, Object> getVersion(String component) {
         Map<String, Object> response = new HashMap<>();
         Info info = infoRepository.findByComponent(component);
-        response.put(component, info.getVersion());
+        if (info != null) {
+            response.put(component, info.getVersion());
+        } else {
+            response.put(component, "Unknown");
+        }
         return response;
     }
 }

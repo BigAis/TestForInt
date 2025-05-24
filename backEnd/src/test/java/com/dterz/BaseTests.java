@@ -1,82 +1,81 @@
 package com.dterz;
 
-import com.dterz.model.*;
-import com.dterz.repositories.AccountRepository;
-import com.dterz.repositories.InfoRepository;
-import com.dterz.repositories.TransactionsRepository;
-import com.dterz.repositories.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import com.dterz.dtos.UserDTO;
+import com.dterz.model.User;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class BaseTests {
+public class UserControllerTests extends BaseTests {
 
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    private WebApplicationContext context;
-
-    @MockBean
-    AccountRepository accountRepository;
-
-    @MockBean
-    TransactionsRepository transactionsRepository;
-
-    @MockBean
-    UserRepository userRepository;
-
-    @MockBean
-    InfoRepository infoRepository;
-
-    Account account = new Account(1L, "testAccount", new Date(), new HashSet<>(), new ArrayList<>());
-    User user = new User(1L, "spring", "", "spring", "spring", "", true, 30, new ArrayList<>(), new HashSet<>(), new HashSet<>());
-    List<Transaction> income = new ArrayList<>();
-    List<Transaction> expences = new ArrayList<>();
-    List<Account> accounts = new ArrayList<>();
-    Transaction t1 = new Transaction(1L, BigDecimal.valueOf(100), new Date(), "description", TransanctionType.INCOME, user, account);
-    Transaction t2 = new Transaction(2L, BigDecimal.valueOf(75), new Date(), "description", TransanctionType.EXPENCE, user, account);
-    Info info = new Info(1L, "Backend", "1.0.0");
-
-    @BeforeEach
-    public void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-        populateTestObjects();
+    @Test
+    @WithMockUser("spring")
+    public void testGetById() throws Exception {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        this.mockMvc.perform(get("/api/user/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userName").value("spring"))
+                .andExpect(status().isOk());
     }
 
-    public void populateTestObjects() {
-        income.add(t1);
-        expences.add(t2);
-        user.getTransactions().add(t1);
-        user.getTransactions().add(t2);
-        user.getAccounts().add(account);
-        account.getUsers().add(user);
-        account.getTransactions().add(t1);
-        account.getTransactions().add(t2);
-        accounts.add(account);
+    @Test
+    @WithMockUser("spring")
+    public void testGetAll() throws Exception {
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        when(userRepository.findAll()).thenReturn(userList);
+        this.mockMvc.perform(get("/api/user")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].userName").value("spring"));
     }
 
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Test
+    @WithMockUser("spring")
+    public void testUpdate() throws Exception {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUserName("spring");
+        userDTO.setFistName("Spring");
+        userDTO.setSurName("Framework");
+        userDTO.setAge(35);
+        
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        this.mockMvc.perform(post("/api/user")
+                        .content(asJsonString(userDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser("spring")
+    public void testCreateAccount() throws Exception {
+        this.mockMvc.perform(get("/api/user/_draft")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(0))
+                .andExpect(status().isOk());
     }
 }

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import com.dterz.dtos.AccountDTO;
 import com.dterz.model.Account;
-import com.dterz.model.TransanctionType;
+import com.dterz.model.TransactionType;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,8 +50,8 @@ public class AccountControllerTests extends BaseTests {
     @WithMockUser("spring")
     public void testCalculation() throws Exception {
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
-        when(transactionsRepository.findByTypeAndAccount_Id(TransanctionType.INCOME, account.getId())).thenReturn(income);
-        when(transactionsRepository.findByTypeAndAccount_Id(TransanctionType.EXPENCE, account.getId())).thenReturn(expences);
+        when(transactionsRepository.findByTypeAndAccount_Id(TransactionType.INCOME, account.getId())).thenReturn(income);
+        when(transactionsRepository.findByTypeAndAccount_Id(TransactionType.EXPENSE, account.getId())).thenReturn(expences);
         this.mockMvc.perform(get("/api/account/1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())

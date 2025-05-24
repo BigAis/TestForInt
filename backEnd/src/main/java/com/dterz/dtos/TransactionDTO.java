@@ -3,7 +3,7 @@ package com.dterz.dtos;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import com.dterz.model.TransanctionType;
+import com.dterz.model.TransactionType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +20,7 @@ public class TransactionDTO {
 
     private String description;
 
-    private TransanctionType type;
+    private TransactionType type;
 
     private String userName;
 

@@ -1,7 +1,7 @@
 package com.dterz.repositories;
 
 import com.dterz.model.Transaction;
-import com.dterz.model.TransanctionType;
+import com.dterz.model.TransactionType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -47,7 +47,7 @@ public interface TransactionsRepository extends GenericRepository<Transaction> {
      * @param accountId the id of the Account
      * @return List<Transaction>
      */
-    List<Transaction> findByTypeAndAccount_Id(TransanctionType type, long accountId);
+    List<Transaction> findByTypeAndAccount_Id(TransactionType type, long accountId);
 
     /**
      * Returns a List of all Transaction id's
@@ -57,4 +57,3 @@ public interface TransactionsRepository extends GenericRepository<Transaction> {
     @Query("SELECT id from Transaction")
     List<Long> findAllIds();
 }
-

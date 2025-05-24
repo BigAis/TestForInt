@@ -12,7 +12,7 @@ import com.dterz.dtos.TransactionDTO;
 import com.dterz.mappers.TransactionMapper;
 import com.dterz.model.Account;
 import com.dterz.model.Transaction;
-import com.dterz.model.TransanctionType;
+import com.dterz.model.TransactionType;
 import com.dterz.model.User;
 import com.dterz.repositories.AccountRepository;
 import com.dterz.repositories.TransactionsRepository;
@@ -98,7 +98,7 @@ public class TransactionsService {
         Transaction draft = new Transaction();
         draft.setAccount(account);
         draft.setDate(new Date());
-        draft.setType(TransanctionType.EXPENCE);
+        draft.setType(TransactionType.EXPENSE);
         return mapper.entityToDto(draft);
     }
 

@@ -4,7 +4,7 @@ import com.dterz.dtos.AccountDTO;
 import com.dterz.mappers.AccountMapper;
 import com.dterz.model.Account;
 import com.dterz.model.Transaction;
-import com.dterz.model.TransanctionType;
+import com.dterz.model.TransactionType;
 import com.dterz.model.User;
 import com.dterz.repositories.AccountRepository;
 import com.dterz.repositories.TransactionsRepository;
@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -65,25 +67,36 @@ public class AccountService {
      * @param accountDTO the Account we need the Balance for
      */
     private void calculateBalance(AccountDTO accountDTO) {
+        if (accountDTO == null) {
+            log.warn("Cannot calculate balance for null accountDTO");
+            return;
+        }
+
         final long start = System.currentTimeMillis();
         
-        // Get transactions directly filtered by account and type
-        List<Transaction> incomeTransactions = transactionsRepository.findByTypeAndAccount_Id(TransanctionType.INCOME, accountDTO.getId());
-        List<Transaction> expenseTransactions = transactionsRepository.findByTypeAndAccount_Id(TransanctionType.EXPENCE, accountDTO.getId());
-        
-        // Calculate sum of income transactions
-        BigDecimal balance = BigDecimal.ZERO;
-        for (Transaction transaction : incomeTransactions) {
-            balance = balance.add(transaction.getAmount());
+        try {
+            // Get all transactions for the account in a single query
+            List<Transaction> allTransactions = transactionsRepository.findByAccountId(accountDTO.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+            
+            // Use Java streams to calculate the balance efficiently
+            BigDecimal balance = allTransactions.stream()
+                .filter(transaction -> transaction.getAmount() != null)
+                .map(transaction -> {
+                    if (TransactionType.INCOME.equals(transaction.getType())) {
+                        return transaction.getAmount();
+                    } else {
+                        return transaction.getAmount().negate();
+                    }
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_EVEN); // Set consistent scale and rounding
+            
+            accountDTO.setCalculatedBalance(balance);
+            log.debug("calculateBalance took {} ms for Account {}", (System.currentTimeMillis() - start), accountDTO.getId());
+        } catch (Exception e) {
+            log.error("Error calculating balance for account {}: {}", accountDTO.getId(), e.getMessage());
+            accountDTO.setCalculatedBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
         }
-        
-        // Subtract expense transactions
-        for (Transaction transaction : expenseTransactions) {
-            balance = balance.subtract(transaction.getAmount());
-        }
-        
-        accountDTO.setCalculatedBalance(balance);
-        log.info("calculateBalance took {} ms for Account {}", (System.currentTimeMillis() - start), accountDTO.getId());
     }
 
     /**

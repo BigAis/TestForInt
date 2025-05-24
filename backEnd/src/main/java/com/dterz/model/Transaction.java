@@ -31,7 +31,7 @@ public class Transaction {
     private String description;
 
     @Column(name = "type")
-    private TransanctionType type;
+    private TransactionType type;
 
     @ManyToOne
     @JoinColumn(name = "user_Id")
