@@ -953,4 +953,6 @@
         </sql>
     </changeSet>
 
+    <include file="db/changelog/2025/05/24-01-add-age-column.xml" relativeToChangelogFile="false"/>
+
 </databaseChangeLog>

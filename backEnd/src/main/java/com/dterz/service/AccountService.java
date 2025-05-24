@@ -30,8 +30,6 @@ public class AccountService {
     private final UserRepository userRepository;
     private final TransactionsRepository transactionsRepository;
 
-    ArrayList<Transaction> accountTransactions = new ArrayList<Transaction>();
-
     /**
      * Gets all Accounts currently in the System.
      * The parameter is optional and if provided the accounts get filtered by User
@@ -52,7 +50,7 @@ public class AccountService {
         Map<String, Object> response = new HashMap<>();
         List<AccountDTO> accountDTOS = mapper.entityListToDTOList(acountList);
         for (AccountDTO accountDTO : accountDTOS) {
-            Calcbalance2(accountDTO, 0d);
+            calculateBalance(accountDTO);
         }
         response.put("accounts", accountDTOS);
         response.put("currentPage", page.getNumber());
@@ -62,42 +60,30 @@ public class AccountService {
     }
 
     /**
-     * Calculates the current balance of an Account based on it transactions
+     * Calculates the current balance of an Account based on its transactions
      *
-     * @param Logarsmos    the Account we need the Balance for
-     * @param initialValue initial balance
+     * @param accountDTO the Account we need the Balance for
      */
-    private void Calcbalance2(Object Logarsmos, Double initialValue) {
+    private void calculateBalance(AccountDTO accountDTO) {
         final long start = System.currentTimeMillis();
-        Double zero = BigDecimal.ZERO.doubleValue();
-        List<Long> transaction = transactionsRepository.findAllIds();
-
-        int next = 0;
-        for (next = 0; next < transaction.size(); next++) {
-            transactionsRepository.findById(transaction.get(next)).get();
-            if (transactionsRepository.findById(transaction.get(next)).get().getAccount().getId() == ((AccountDTO) Logarsmos).getId())
-                accountTransactions.add(transactionsRepository.findById(transaction.get(next)).get());
+        
+        // Get transactions directly filtered by account and type
+        List<Transaction> incomeTransactions = transactionsRepository.findByTypeAndAccount_Id(TransanctionType.INCOME, accountDTO.getId());
+        List<Transaction> expenseTransactions = transactionsRepository.findByTypeAndAccount_Id(TransanctionType.EXPENCE, accountDTO.getId());
+        
+        // Calculate sum of income transactions
+        BigDecimal balance = BigDecimal.ZERO;
+        for (Transaction transaction : incomeTransactions) {
+            balance = balance.add(transaction.getAmount());
         }
-        for (int y = 0; y < accountTransactions.size(); y++) {
-            if (TransanctionType.INCOME.equals(accountTransactions.get(y).getType())) {
-                zero = zero + accountTransactions.get(y).getAmount().doubleValue();
-            }
+        
+        // Subtract expense transactions
+        for (Transaction transaction : expenseTransactions) {
+            balance = balance.subtract(transaction.getAmount());
         }
-        for (int x = 0; x < accountTransactions.size(); x++)
-            if (TransanctionType.EXPENCE.equals(accountTransactions.get(x).getType())) {
-                zero = zero - accountTransactions.get(x).getAmount().doubleValue();
-            }
-        accountTransactions.sort(new Comparator<Transaction>() {
-
-            @Override
-            public int compare(Transaction o1, Transaction o2) {
-                return o1.getDate().compareTo(o1.getDate());
-            }
-
-        });
-        ((AccountDTO) Logarsmos).setCalculatedBalance(BigDecimal.valueOf(zero));
-        accountTransactions.clear();
-        log.info("calcBalance took {} ms for Account {}", (System.currentTimeMillis() - start), ((AccountDTO) Logarsmos).getId());
+        
+        accountDTO.setCalculatedBalance(balance);
+        log.info("calculateBalance took {} ms for Account {}", (System.currentTimeMillis() - start), accountDTO.getId());
     }
 
     /**
@@ -109,7 +95,7 @@ public class AccountService {
     public AccountDTO getAccountById(long accountId) {
         Account account = accountRepository.findById(accountId).orElse(null);
         AccountDTO accountDTO = mapper.entityToDto(account);
-        Calcbalance2(accountDTO, null);
+        calculateBalance(accountDTO);
         return accountDTO;
     }
 

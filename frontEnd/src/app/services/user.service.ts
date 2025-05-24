@@ -11,6 +11,7 @@ export interface User {
   fistName: string;
   surName: string;
   comments: string;
+  age: number;
   superAdmin: boolean;
   permissions: any[];
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.7.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="20250524-add-age-to-user" author="developer">
+        <addColumn tableName="CLIENT_USER">
+            <column name="age" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <!-- Update existing users with sample age data -->
+        <update tableName="CLIENT_USER">
+            <column name="age" valueNumeric="30"/>
+            <where>id = 1</where>
+        </update>
+        <update tableName="CLIENT_USER">
+            <column name="age" valueNumeric="35"/>
+            <where>id = 2</where>
+        </update>
+        <update tableName="CLIENT_USER">
+            <column name="age" valueNumeric="28"/>
+            <where>id = 3</where>
+        </update>
+        <update tableName="CLIENT_USER">
+            <column name="age" valueNumeric="42"/>
+            <where>id = 4</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

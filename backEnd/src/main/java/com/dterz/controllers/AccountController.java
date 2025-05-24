@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AccountController {
 
-    private final accountService accountService;
+    private final AccountService accountService;
 
     /**
      * Gets an Acount by its id

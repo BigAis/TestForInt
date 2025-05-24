@@ -42,6 +42,7 @@ export class EditUserComponent implements OnInit {
       salt: new FormControl(null),
       pass: new FormControl(null, Validators.required),
       superAdmin: new FormControl(null),
+      age: new FormControl(null, [Validators.min(0), Validators.max(120)]),
       permissions: new FormArray([])
     });
   }
@@ -75,6 +76,5 @@ export class EditUserComponent implements OnInit {
       form.markAsDirty();
       this.notifyService.showError("Form is invalid");
     }
-
   }
 }
