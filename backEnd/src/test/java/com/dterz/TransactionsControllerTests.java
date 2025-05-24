@@ -46,6 +46,8 @@ public class TransactionsControllerTests extends BaseTests {
         transactionDTO.setUserName("spring");
         transactionDTO.setAccountName("testAccount");
         transactionDTO.setAmount(BigDecimal.valueOf(999));
+
+        // t1 is now accessible because it's a protected instance variable from BaseTests
         when(transactionsRepository.findById(1L)).thenReturn(Optional.of(t1));
         when(userRepository.findByUserName("spring")).thenReturn(user);
         when(accountRepository.findByDescription("testAccount")).thenReturn(account);
@@ -61,6 +63,7 @@ public class TransactionsControllerTests extends BaseTests {
     @Test
     @WithMockUser("spring")
     public void testGetById() throws Exception {
+        // t2 is now accessible because it's a protected instance variable from BaseTests
         when(transactionsRepository.findById(2L)).thenReturn(Optional.of(t2));
         this.mockMvc.perform(get("/api/transactions/2")
                         .accept(MediaType.APPLICATION_JSON))

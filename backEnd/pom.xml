@@ -22,7 +22,6 @@
 
     <dependencies>
 
-        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -46,7 +45,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -58,20 +56,17 @@
             <scope>test</scope>
         </dependency>
 
-        <!--Third Party-->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.liquibase/liquibase-core -->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>4.8.0</version>
         </dependency>
-
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -111,7 +106,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -124,7 +118,6 @@
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
 
-            <!-- Compile the project's source -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -138,13 +131,11 @@
                             <artifactId>lombok</artifactId>
                             <version>${org.projectlombok.version}</version>
                         </path>
-                        <!-- This is needed when using Lombok 1.18.16 and above -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>
                             <version>0.2.0</version>
                         </path>
-                        <!-- Mapstruct should follow the lombok path(s) -->
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
@@ -154,14 +145,12 @@
                 </configuration>
             </plugin>
 
-            <!-- Run unit tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M5</version>
             </plugin>
 
-            <!-- Gather the "dist" directory from frontend project -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -174,7 +163,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/resources/</outputDirectory>
+                            <outputDirectory>${project.build.directory}/classes/static/</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${frontend-bundle-dir}</directory>
@@ -184,7 +173,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Spring Boot's maven plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -199,7 +187,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--Generate Q-->
             <plugin>
                 <groupId>com.mysema.maven</groupId>
                 <artifactId>apt-maven-plugin</artifactId>
