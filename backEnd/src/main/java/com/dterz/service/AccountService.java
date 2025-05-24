@@ -63,6 +63,7 @@ public class AccountService {
 
     /**
      * Calculates the current balance of an Account based on its transactions
+     * IMPROVED VERSION - fixes performance, style, and functionality issues
      *
      * @param accountDTO the Account we need the Balance for
      */

@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {AboutService} from "../services/about.service";
-import {tap} from "rxjs/operators";
+import {tap, catchError} from "rxjs/operators";
+import {of} from "rxjs";
 
 @Component({
   selector: 'app-about',
@@ -9,8 +10,8 @@ import {tap} from "rxjs/operators";
 })
 export class AboutComponent implements OnInit {
 
-  backVersion: string;
-  frontVersion: string;
+  backVersion: string = 'Unknown';
+  frontVersion: string = 'Unknown';
 
   constructor(private aboutService: AboutService) {
   }
@@ -22,14 +23,26 @@ export class AboutComponent implements OnInit {
   private populateMask() {
     this.aboutService.getVersion("backend").pipe(
       tap((response: any) => {
-        this.backVersion = response.body.backend;
+        // Handle both response.body.backend and direct response.backend
+        this.backVersion = response.body?.backend || response.backend || 'Unknown';
+      }),
+      catchError(error => {
+        console.error('Error fetching backend version:', error);
+        this.backVersion = 'Error loading version';
+        return of(null);
       })
     ).subscribe();
+    
     this.aboutService.getVersion("frontend").pipe(
       tap((response: any) => {
-        this.frontVersion = response.body.frontend;
+        // Handle both response.body.frontend and direct response.frontend  
+        this.frontVersion = response.body?.frontend || response.frontend || 'Unknown';
+      }),
+      catchError(error => {
+        console.error('Error fetching frontend version:', error);
+        this.frontVersion = 'Error loading version';
+        return of(null);
       })
     ).subscribe();
   }
-
 }
