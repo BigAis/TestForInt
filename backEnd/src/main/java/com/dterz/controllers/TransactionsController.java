@@ -5,6 +5,8 @@ import com.dterz.service.TransactionsService;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("api/transactions")
@@ -111,5 +115,24 @@ public class TransactionsController {
                                               @RequestParam(name = "accountId", defaultValue = "") String accountId) {
         PageRequest pageRequest = PageRequest.of(page, size, direction.equals("asc") ? Sort.by(sort).ascending() : Sort.by(sort).descending());
         return ResponseEntity.ok(transactionsService.getAllForAccount(pageRequest, accountId));
+    }
+    
+    /**
+     * Exports transactions for an account as CSV
+     *
+     * @param accountId the id of the Account to export transactions for
+     * @return CSV file
+     */
+    @GetMapping("export/{accountId}")
+    public ResponseEntity<byte[]> exportTransactions(@PathVariable("accountId") String accountId) {
+        String csvContent = transactionsService.exportTransactionsToCSV(accountId);
+        
+        byte[] csvBytes = csvContent.getBytes(StandardCharsets.UTF_8);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=transactions.csv");
+        headers.set(HttpHeaders.CONTENT_TYPE, "text/csv");
+        
+        return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
     }
 }

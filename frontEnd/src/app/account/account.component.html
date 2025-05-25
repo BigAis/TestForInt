@@ -93,6 +93,9 @@
             <button mat-icon-button title="Add Transaction" (click)="addTransaction()" type="button" *ngIf="paramId">
               <mat-icon>add_circle_outline</mat-icon>
             </button>
+            <button mat-icon-button title="Export Transactions as CSV" (click)="exportTransactionsCSV()" type="button" *ngIf="paramId">
+              <mat-icon>file_download</mat-icon>
+            </button>
           </div>
           <div class="col-sm-10 col-md-10 col-lg-10">
             <table mat-table class="mat-elevation-z8" [dataSource]="transactionList" matSort
@@ -114,7 +117,7 @@
                     <mat-icon>arrow_downward</mat-icon>
                     Incoming
                   </label>
-                  <label *ngSwitchCase="'EXPENCE'">
+                  <label *ngSwitchCase="'EXPENSE'">
                     <mat-icon>arrow_upward</mat-icon>
                     Outgoing
                   </label>

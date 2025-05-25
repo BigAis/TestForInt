@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.text.SimpleDateFormat;
 
 import javax.transaction.Transactional;
 
@@ -135,5 +136,35 @@ public class TransactionsService {
     public TransactionDTO getTransactionById(long transactionId) {
         Transaction transaction = transactionsRepository.findById(transactionId).orElse(null);
         return mapper.entityToDto(transaction);
+    }
+    
+    /**
+     * Exports transactions for an account as CSV
+     *
+     * @param accountId the id of the Account to export transactions for
+     * @return CSV content as a string
+     */
+    public String exportTransactionsToCSV(String accountId) {
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
+        Page<Transaction> page = transactionsRepository.findByAccountId(Long.parseLong(accountId), pageRequest);
+        List<Transaction> transactions = page.getContent();
+        
+        StringBuilder csvContent = new StringBuilder();
+        // CSV Header
+        csvContent.append("Date,Description,Type,Amount,User\n");
+        
+        // Add data rows
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (Transaction transaction : transactions) {
+            csvContent.append(dateFormat.format(transaction.getDate())).append(",");
+            // Escape quotes in description
+            String escapedDescription = transaction.getDescription().replace("\"", "\"\"");
+            csvContent.append("\"").append(escapedDescription).append("\",");
+            csvContent.append(transaction.getType()).append(",");
+            csvContent.append(transaction.getAmount()).append(",");
+            csvContent.append(transaction.getUser().getUserName()).append("\n");
+        }
+        
+        return csvContent.toString();
     }
 }

@@ -70,4 +70,12 @@ export class TransactionService {
       observe: 'response'
     })
   }
+  
+  exportTransactionsCSV(accountId: string): Observable<any> {
+    return this.httpClient.get(
+      `${environment.apiUrl}/transactions/export/${accountId}`, {
+        responseType: 'blob',
+        observe: 'response'
+      });
+  }
 }

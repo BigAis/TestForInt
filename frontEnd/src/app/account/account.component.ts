@@ -147,4 +147,28 @@ export class AccountComponent implements OnInit {
   addUser() {
     this.notifyService.showWarning("Functionality not supported yet");
   }
+  
+  exportTransactionsCSV() {
+    this.transactionService.exportTransactionsCSV(this.paramId).subscribe(
+      response => {
+        // Create a blob from the response
+        const blob = new Blob([response.body], { type: 'text/csv' });
+        
+        // Create a link element, use it for the download, then remove it
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `account-${this.paramId}-transactions.csv`;
+        link.click();
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        this.notifyService.showSuccess("Transactions exported successfully");
+      },
+      error => {
+        this.notifyService.showError("Failed to export transactions");
+        console.error('Error exporting transactions:', error);
+      }
+    );
+  }
 }
